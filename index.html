@@ -1,1293 +1,448 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bulletin - Group Hub</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Inter & Outfit -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        cork: {
-                            50: '#fdfbf7',
-                            100: '#f8f3e8',
-                            200: '#eedfbe',
-                            300: '#e2c690',
-                            400: '#d7aa64',
-                            500: '#cd9344',
-                            600: '#ba7736',
-                            700: '#9b5b2e',
-                            800: '#7e492b',
-                            900: '#673d27',
-                            950: '#381e13',
-                        },
-                        paper: {
-                            yellow: '#fef3c7',
-                            green: '#dcfce7',
-                            pink: '#fce7f3',
-                            blue: '#e0f2fe',
-                            cream: '#fefae0',
-                            corkboard: '#d4a373'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        display: ['Outfit', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bulletin - Group Collaboration Hub</title>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --cork-bg: #d7a15c;
+      --cork-pattern: #c8924e;
+      --paper-cream: #fffdf5;
+      --paper-yellow: #fff9d6;
+      --warm-brown: #5c3a21;
+      --dark-brown: #3d2310;
+      --accent-red: #d9534f;
+      --accent-orange: #f0ad4e;
+      --soft-shadow: 0 4px 12px rgba(61, 35, 16, 0.15);
+      --card-shadow: 2px 6px 15px rgba(0, 0, 0, 0.12);
+      --font-main: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    }
 
-    <style>
-        /* Corkboard Pattern Background */
-        .cork-texture {
-            background-color: #d4a373;
-            background-image: radial-gradient(#bc8a5f 1.5px, transparent 1.5px), radial-gradient(#bc8a5f 1.5px, #d4a373 1.5px);
-            background-size: 30px 30px;
-            background-position: 0 0, 15px 15px;
-        }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-main);
+    }
 
-        .paper-shadow {
-            box-shadow: 0 4px 6px -1px rgba(51, 34, 17, 0.1), 0 2px 4px -1px rgba(51, 34, 17, 0.06), 0 10px 15px -3px rgba(51, 34, 17, 0.1);
-        }
+    body {
+      background-color: var(--cork-bg);
+      background-image: radial-gradient(var(--cork-pattern) 15%, transparent 16%);
+      background-size: 12px 12px;
+      color: var(--dark-brown);
+      min-height: 100vh;
+      display: flex;
+    }
 
-        .pin-head {
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 35% 35%, #ef4444, #991b1b);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            position: absolute;
-            top: -6px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
-        }
+    /* Auth Overlay */
+    #auth-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(61, 35, 16, 0.7);
+      backdrop-filter: blur(6px);
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.05);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cd9344;
-            border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #ba7736;
-        }
-    </style>
+    .auth-card {
+      background: var(--paper-cream);
+      padding: 30px;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      border: 3px solid var(--warm-brown);
+      position: relative;
+    }
+
+    .auth-pin {
+      width: 16px;
+      height: 16px;
+      background: var(--accent-red);
+      border-radius: 50%;
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .auth-title {
+      font-size: 1.8rem;
+      color: var(--dark-brown);
+      text-align: center;
+      margin-bottom: 8px;
+      margin-top: 10px;
+    }
+
+    .auth-sub {
+      font-size: 0.9rem;
+      color: #775a43;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--warm-brown);
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px 14px;
+      border: 2px solid #e0d0c0;
+      border-radius: 8px;
+      background: #fff;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-control:focus {
+      border-color: var(--warm-brown);
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 12px;
+      background: var(--warm-brown);
+      color: var(--paper-cream);
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: var(--dark-brown);
+    }
+
+    .auth-toggle {
+      text-align: center;
+      margin-top: 16px;
+      font-size: 0.85rem;
+      color: var(--warm-brown);
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    /* Main Layout */
+    #app-container {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    sidebar {
+      width: 260px;
+      background: var(--paper-cream);
+      border-right: 2px solid rgba(92, 58, 33, 0.2);
+      display: flex;
+      flex-direction: column;
+      padding: 20px 15px;
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 25px;
+      padding-left: 8px;
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--warm-brown);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--paper-cream);
+    }
+
+    .group-selector {
+      margin-bottom: 20px;
+    }
+
+    .group-selector label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #8c6d56;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .group-select {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid #d0c0b0;
+      background: #fff;
+      font-weight: 600;
+      color: var(--dark-brown);
+    }
+
+    .nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      color: var(--warm-brown);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      background: rgba(92, 58, 33, 0.1);
+      color: var(--dark-brown);
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      border-top: 1px solid #e0d0c0;
+      margin-top: auto;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--warm-brown);
+      color: var(--paper-cream);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    /* Main View Area */
+    main {
+      flex: 1;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 30px;
+      position: relative;
+    }
+
+    .view-header {
+      margin-bottom: 25px;
+    }
+
+    .view-title {
+      font-size: 2rem;
+      color: var(--dark-brown);
+    }
+
+    /* Board Views & Cards */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .cork-card {
+      background: var(--paper-cream);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: var(--card-shadow);
+      position: relative;
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .push-pin {
+      width: 12px;
+      height: 12px;
+      background: var(--accent-red);
+      border-radius: 50%;
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+
+    /* Floating Action Button (FAB) */
+    .fab-container {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 10px;
+      z-index: 100;
+    }
+
+    .fab-options {
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-end;
+    }
+
+    .fab-options.show {
+      display: flex;
+    }
+
+    .fab-btn-option {
+      background: var(--paper-cream);
+      color: var(--dark-brown);
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 2px solid var(--warm-brown);
+      font-weight: 600;
+      box-shadow: var(--soft-shadow);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .fab-btn-main {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--warm-brown);
+      color: var(--paper-cream);
+      border: none;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.5rem;
+      transition: transform 0.2s;
+    }
+
+    .fab-btn-main:hover {
+      transform: scale(1.05);
+    }
+
+    /* Modal Styling */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--paper-cream);
+      padding: 25px;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: var(--card-shadow);
+      border: 2px solid var(--warm-brown);
+      position: relative;
+    }
+
+    .modal-tabs {
+      display: flex;
+      gap: 10px;
+      border-bottom: 2px solid #e0d0c0;
+      margin-bottom: 20px;
+    }
+
+    .modal-tab {
+      padding: 8px 16px;
+      font-weight: 600;
+      color: #8c6d56;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+    }
+
+    .modal-tab.active {
+      color: var(--warm-brown);
+      border-bottom-color: var(--warm-brown);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Bottom Navigation Bar for Mobile */
+    .bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--paper-cream);
+      border-top: 1px solid #d0c0b0;
+      padding: 8px 0;
+      z-index: 90;
+      justify-content: space-around;
+    }
+
+    @media (max-width: 768px) {
+      sidebar {
+        display: none;
+      }
+      .bottom-nav {
+        display: flex;
+      }
+      main {
+        padding-bottom: 80px;
+      }
+    }
+  </style>
 </head>
-<body class="h-full bg-cork-100 text-cork-950 font-sans antialiased overflow-hidden selection:bg-cork-300">
-
-    <!-- APP CONTAINER -->
-    <div id="app" class="h-full flex flex-col md:flex-row relative">
-
-        <!-- AUTH MODAL / OVERLAY (SHOWS BY DEFAULT IF NOT LOGGED IN) -->
-        <div id="auth-modal" class="fixed inset-0 z-50 bg-cork-950/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-            <div class="bg-paper-cream border-2 border-cork-300 rounded-3xl paper-shadow w-full max-w-md p-6 md:p-8 relative overflow-hidden my-auto">
-                <!-- Push Pin Decor -->
-                <div class="pin-head"></div>
-
-                <!-- Join Banner if invited -->
-                <div id="auth-invite-banner" class="hidden mb-4 p-3 bg-amber-100 border border-amber-300 text-amber-900 rounded-xl text-xs font-medium flex items-center gap-2">
-                    <svg class="w-4 h-4 text-amber-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    <span>Log in or register to automatically join group <strong id="invite-code-tag">BUL7240</strong></span>
-                </div>
-
-                <!-- Brand Header -->
-                <div class="text-center mb-6">
-                    <div class="w-14 h-14 bg-cork-700 text-paper-cream rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-md transform -rotate-3">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
-                    </div>
-                    <h1 class="font-display text-2xl font-bold text-cork-900">Welcome to Bulletin</h1>
-                    <p class="text-sm text-cork-700 mt-1">Your localized group hub & notice board</p>
-                </div>
-
-                <!-- Toggle Tabs (Login vs Register) -->
-                <div class="flex bg-cork-200/60 p-1 rounded-xl mb-6">
-                    <button id="tab-login-btn" onclick="switchAuthTab('login')" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all bg-paper-cream text-cork-900 shadow-sm">Sign In</button>
-                    <button id="tab-register-btn" onclick="switchAuthTab('register')" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all text-cork-700 hover:text-cork-900">Create Account</button>
-                </div>
-
-                <!-- LOGIN FORM -->
-                <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-cork-800 mb-1">Email Address</label>
-                        <input type="email" id="login-email" required placeholder="you@example.com" class="w-full px-4 py-2.5 rounded-xl border border-cork-300 bg-white/80 focus:bg-white focus:ring-2 focus:ring-cork-500 focus:outline-none text-sm transition-all">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-cork-800 mb-1">Password</label>
-                        <input type="password" id="login-password" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl border border-cork-300 bg-white/80 focus:bg-white focus:ring-2 focus:ring-cork-500 focus:outline-none text-sm transition-all">
-                    </div>
-                    <button type="submit" class="w-full py-3 bg-cork-700 hover:bg-cork-800 text-white font-bold text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
-                        <span>Sign In</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                    </button>
-                </form>
-
-                <!-- REGISTER FORM -->
-                <form id="register-form" onsubmit="handleRegister(event)" class="space-y-3 hidden">
-                    <div>
-                        <label class="block text-xs font-semibold text-cork-800 mb-1">Full Name</label>
-                        <input type="text" id="reg-name" required placeholder="e.g. Sarah Connor" class="w-full px-4 py-2 rounded-xl border border-cork-300 bg-white/80 focus:bg-white focus:ring-2 focus:ring-cork-500 focus:outline-none text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-cork-800 mb-1">Handle / Username</label>
-                        <input type="text" id="reg-handle" required placeholder="@sarahc" class="w-full px-4 py-2 rounded-xl border border-cork-300 bg-white/80 focus:bg-white focus:ring-2 focus:ring-cork-500 focus:outline-none text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-cork-800 mb-1">Email / Gmail</label>
-                        <input type="email" id="reg-email" required placeholder="sarah@gmail.com" class="w-full px-4 py-2 rounded-xl border border-cork-300 bg-white/80 focus:bg-white focus:ring-2 focus:ring-cork-500 focus:outline-none text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-cork-800 mb-1">Phone Number (Optional)</label>
-                        <input type="tel" id="reg-phone" placeholder="+1 (555) 000-0000" class="w-full px-4 py-2 rounded-xl border border-cork-300 bg-white/80 focus:bg-white focus:ring-2 focus:ring-cork-500 focus:outline-none text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-cork-800 mb-1">Password</label>
-                        <input type="password" id="reg-password" required placeholder="••••••••" class="w-full px-4 py-2 rounded-xl border border-cork-300 bg-white/80 focus:bg-white focus:ring-2 focus:ring-cork-500 focus:outline-none text-sm">
-                    </div>
-                    <button type="submit" class="w-full py-3 bg-cork-800 hover:bg-cork-900 text-white font-bold text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 mt-2">
-                        <span>Create Account & Start</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                    </button>
-                </form>
-
-                <!-- Demo Credentials Helper -->
-                <div class="mt-6 pt-4 border-t border-cork-200 text-center">
-                    <p class="text-[11px] text-cork-600">Want to test with sample data? <button onclick="quickDemoLogin()" class="text-cork-800 font-bold underline hover:text-cork-950">Click for Demo Account</button></p>
-                </div>
-            </div>
-        </div>
-
-        <!-- ONBOARDING TUTORIAL MODAL (SALLY & FRIENDS) -->
-        <div id="onboarding-modal" class="fixed inset-0 z-50 bg-cork-950/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
-            <div class="bg-paper-cream border-2 border-cork-300 rounded-3xl paper-shadow w-full max-w-lg p-6 relative overflow-hidden">
-                <div class="pin-head"></div>
-                
-                <div id="onboarding-step-1" class="space-y-4">
-                    <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto text-3xl">👋</div>
-                    <h2 class="font-display text-2xl font-bold text-center text-cork-900">Welcome to Bulletin!</h2>
-                    <p class="text-sm text-cork-700 text-center leading-relaxed">
-                        We created a starter group called <strong class="text-cork-900">Sally & Friends Hub</strong> so you can immediately see how announcements, calendar events, polls, and stream posts work!
-                    </p>
-                    <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200 flex items-start gap-3">
-                        <div class="w-10 h-10 rounded-full bg-amber-300 text-amber-900 flex items-center justify-center font-bold text-sm shrink-0">S</div>
-                        <div>
-                            <h4 class="text-xs font-bold text-cork-900">Sally Jenkins (Group Admin)</h4>
-                            <p class="text-xs text-cork-700 mt-0.5">"Hey there! Welcome to the group. Check out our upcoming weekend picnic event or leave a vote on the poll!"</p>
-                        </div>
-                    </div>
-                    <button onclick="nextOnboardingStep(2)" class="w-full py-3 bg-cork-700 hover:bg-cork-800 text-white font-bold text-sm rounded-xl shadow transition-all">
-                        Show Me Around &rarr;
-                    </button>
-                </div>
-
-                <div id="onboarding-step-2" class="space-y-4 hidden">
-                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto text-3xl">📌</div>
-                    <h2 class="font-display text-2xl font-bold text-center text-cork-900">How Bulletin Works</h2>
-                    <ul class="text-xs text-cork-800 space-y-2 max-w-xs mx-auto">
-                        <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-cork-600"></span> <strong>Bulletin Feed:</strong> Post pinned notes, images, or updates.</li>
-                        <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-cork-600"></span> <strong>Events & Calendar:</strong> Sync group events to your calendar.</li>
-                        <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-cork-600"></span> <strong>Invites:</strong> Share custom invite links or code <code class="bg-cork-200 px-1 rounded text-cork-900">BUL7240</code>.</li>
-                        <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-cork-600"></span> <strong>Gemini AI:</strong> Ask questions about schedule & notices anytime.</li>
-                    </ul>
-                    <button onclick="finishOnboarding()" class="w-full py-3 bg-cork-800 hover:bg-cork-900 text-white font-bold text-sm rounded-xl shadow transition-all">
-                        Get Started Now!
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- LEFT SIDEBAR (DESKTOP) -->
-        <aside class="w-full md:w-64 bg-paper-cream border-r border-cork-300 flex-col justify-between hidden md:flex shrink-0">
-            <div>
-                <!-- Brand Header -->
-                <div class="p-5 border-b border-cork-200 flex items-center gap-3">
-                    <div class="w-10 h-10 bg-cork-700 text-paper-cream rounded-xl flex items-center justify-center font-bold shadow-sm transform -rotate-3 shrink-0">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
-                    </div>
-                    <div>
-                        <h1 class="font-display font-bold text-lg text-cork-900 leading-none">Bulletin</h1>
-                        <span class="text-[11px] font-medium text-cork-600">Group Hub & Boards</span>
-                    </div>
-                </div>
-
-                <!-- Group Selector Dropdown -->
-                <div class="p-4 border-b border-cork-200">
-                    <label class="block text-[10px] font-bold uppercase tracking-wider text-cork-600 mb-1.5">Active Bulletin</label>
-                    <select id="sidebar-group-select" onchange="changeActiveGroup(this.value)" class="w-full bg-white border border-cork-300 text-cork-900 rounded-xl py-2 px-3 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-cork-500 shadow-sm cursor-pointer">
-                        <!-- Populated by JS -->
-                    </select>
-                </div>
-
-                <!-- Navigation Links -->
-                <nav class="p-3 space-y-1">
-                    <p class="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-cork-500">Board Hubs</p>
-                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn active-nav w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 00-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 00-1 1m-6 0h6"></path></svg>
-                        <span>Home Dashboard</span>
-                    </button>
-                    <button onclick="switchTab('feed')" id="nav-feed" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-cork-800 hover:bg-cork-200/50 transition-all">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-                        <span>Bulletin Feed</span>
-                    </button>
-                    <button onclick="switchTab('summary')" id="nav-summary" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-cork-800 hover:bg-cork-200/50 transition-all">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                        <span>Weekly Summary</span>
-                    </button>
-                    <button onclick="switchTab('events')" id="nav-events" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-cork-800 hover:bg-cork-200/50 transition-all">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        <span>Events & Sync</span>
-                    </button>
-                    <button onclick="switchTab('polls')" id="nav-polls" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-cork-800 hover:bg-cork-200/50 transition-all">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                        <span>Polls</span>
-                    </button>
-                    <button onclick="switchTab('members')" id="nav-members" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-cork-800 hover:bg-cork-200/50 transition-all">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                        <span>Members & Invites</span>
-                    </button>
-                    <button onclick="switchTab('gemini')" id="nav-gemini" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-amber-800 hover:bg-amber-100/60 transition-all">
-                        <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                        <span>Gemini AI Helper</span>
-                    </button>
-
-                    <p class="px-3 pt-4 pb-1 text-[10px] font-bold uppercase tracking-wider text-cork-500">System</p>
-                    <button onclick="switchTab('settings')" id="nav-settings" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-cork-800 hover:bg-cork-200/50 transition-all">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg>
-                        <span>Settings</span>
-                    </button>
-                </nav>
-            </div>
-
-            <!-- Profile Footer & LOGOUT -->
-            <div class="p-3 border-t border-cork-200 bg-cork-200/30">
-                <div class="flex items-center justify-between p-2 rounded-xl bg-white border border-cork-200 shadow-sm">
-                    <div class="flex items-center gap-2.5 min-w-0">
-                        <div id="user-avatar" class="w-8 h-8 rounded-full bg-cork-700 text-white flex items-center justify-center font-bold text-xs shrink-0">
-                            ?
-                        </div>
-                        <div class="truncate">
-                            <h4 id="user-name-display" class="text-xs font-bold text-cork-900 truncate">Loading...</h4>
-                            <p id="user-handle-display" class="text-[10px] text-cork-600 truncate">@user</p>
-                        </div>
-                    </div>
-                    <!-- EXPLICIT LOGOUT BUTTON -->
-                    <button onclick="handleLogout()" title="Sign Out" class="p-2 text-cork-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all shrink-0">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                    </button>
-                </div>
-            </div>
-        </aside>
-
-        <!-- MAIN WORKSPACE -->
-        <main class="flex-1 flex flex-col h-full overflow-hidden cork-texture relative">
-            
-            <!-- MOBILE TOP HEADER -->
-            <header class="md:hidden bg-paper-cream border-b border-cork-300 p-3 flex items-center justify-between shrink-0 z-20">
-                <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 bg-cork-700 text-paper-cream rounded-lg flex items-center justify-center font-bold text-xs shadow-sm">
-                        📌
-                    </div>
-                    <div>
-                        <h1 class="font-display font-bold text-sm text-cork-900 leading-tight" id="mobile-title">Dashboard</h1>
-                        <p class="text-[10px] text-cork-600" id="mobile-group-name">Sally & Friends Hub</p>
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-2">
-                    <select id="mobile-group-select" onchange="changeActiveGroup(this.value)" class="bg-white border border-cork-300 text-cork-900 rounded-lg py-1 px-2 text-xs font-semibold focus:outline-none">
-                        <!-- Populated by JS -->
-                    </select>
-                    <button onclick="handleLogout()" class="p-1.5 text-cork-700 hover:text-red-600 bg-cork-200/50 rounded-lg">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                    </button>
-                </div>
-            </header>
-
-            <!-- CONTENT SCROLL AREA -->
-            <div id="content-area" class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6">
-                <!-- DYNAMIC CONTENT LOADED VIA JS -->
-            </div>
-
-            <!-- FLOATING ACTION BUTTON (FAB) WITH EXPAND MENU -->
-            <div class="fixed bottom-20 md:bottom-8 right-6 z-30">
-                <div id="fab-menu" class="flex flex-col items-end gap-2 mb-3 hidden transform transition-all duration-200 opacity-0 scale-95">
-                    <button onclick="openModal('create-post-modal')" class="bg-paper-cream hover:bg-white text-cork-900 text-xs font-bold px-4 py-2.5 rounded-full paper-shadow border border-cork-300 flex items-center gap-2">
-                        <span>📝 Pinned Note</span>
-                    </button>
-                    <button onclick="openModal('create-event-modal')" class="bg-paper-cream hover:bg-white text-cork-900 text-xs font-bold px-4 py-2.5 rounded-full paper-shadow border border-cork-300 flex items-center gap-2">
-                        <span>📅 Calendar Event</span>
-                    </button>
-                    <button onclick="openModal('create-poll-modal')" class="bg-paper-cream hover:bg-white text-cork-900 text-xs font-bold px-4 py-2.5 rounded-full paper-shadow border border-cork-300 flex items-center gap-2">
-                        <span>📊 Voting Poll</span>
-                    </button>
-                    <button onclick="openModal('join-group-modal')" class="bg-paper-cream hover:bg-white text-cork-900 text-xs font-bold px-4 py-2.5 rounded-full paper-shadow border border-cork-300 flex items-center gap-2">
-                        <span>🔑 Join Group Code</span>
-                    </button>
-                </div>
-                <button onclick="toggleFab()" id="fab-btn" class="w-14 h-14 bg-cork-700 hover:bg-cork-800 text-paper-cream rounded-full paper-shadow flex items-center justify-center transition-all duration-300 focus:outline-none">
-                    <svg id="fab-icon" class="w-7 h-7 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
-                </button>
-            </div>
-
-            <!-- MOBILE BOTTOM BAR -->
-            <nav class="md:hidden bg-paper-cream border-t border-cork-300 flex justify-around items-center p-2 shrink-0 z-20">
-                <button onclick="switchTab('dashboard')" class="mobile-nav-btn p-2 text-cork-800 flex flex-col items-center gap-0.5">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 00-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 00-1 1m-6 0h6"></path></svg>
-                    <span class="text-[9px] font-bold">Home</span>
-                </button>
-                <button onclick="switchTab('feed')" class="mobile-nav-btn p-2 text-cork-600 flex flex-col items-center gap-0.5">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-                    <span class="text-[9px] font-bold">Feed</span>
-                </button>
-                <button onclick="switchTab('events')" class="mobile-nav-btn p-2 text-cork-600 flex flex-col items-center gap-0.5">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    <span class="text-[9px] font-bold">Events</span>
-                </button>
-                <button onclick="switchTab('gemini')" class="mobile-nav-btn p-2 text-amber-700 flex flex-col items-center gap-0.5">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    <span class="text-[9px] font-bold">AI</span>
-                </button>
-                <button onclick="switchTab('settings')" class="mobile-nav-btn p-2 text-cork-600 flex flex-col items-center gap-0.5">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg>
-                    <span class="text-[9px] font-bold">Settings</span>
-                </button>
-            </nav>
-        </main>
-    </div>
-
-    <!-- MODALS CONTAINER -->
-    <!-- 1. CREATE GROUP MODAL -->
-    <div id="create-group-modal" class="fixed inset-0 z-50 bg-cork-950/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-        <div class="bg-paper-cream border-2 border-cork-300 rounded-3xl paper-shadow w-full max-w-md p-6 relative">
-            <div class="pin-head"></div>
-            <h3 class="font-display font-bold text-xl text-cork-900 mb-4">Create New Bulletin Group</h3>
-            <form onsubmit="handleCreateGroup(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-cork-800 mb-1">Group Title</label>
-                    <input type="text" id="new-group-name" required placeholder="e.g. Sunset Heights Neighbors" class="w-full px-4 py-2 rounded-xl border border-cork-300 bg-white text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-cork-800 mb-1">Description</label>
-                    <textarea id="new-group-desc" rows="2" placeholder="What is this group for?" class="w-full px-4 py-2 rounded-xl border border-cork-300 bg-white text-sm"></textarea>
-                </div>
-                <div class="flex justify-end gap-2 pt-2">
-                    <button type="button" onclick="closeModal('create-group-modal')" class="px-4 py-2 text-xs font-bold text-cork-700 hover:bg-cork-200/50 rounded-xl">Cancel</button>
-                    <button type="submit" class="px-5 py-2 bg-cork-700 hover:bg-cork-800 text-white text-xs font-bold rounded-xl shadow">Create Bulletin</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- 2. JOIN GROUP MODAL -->
-    <div id="join-group-modal" class="fixed inset-0 z-50 bg-cork-950/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-        <div class="bg-paper-cream border-2 border-cork-300 rounded-3xl paper-shadow w-full max-w-md p-6 relative">
-            <div class="pin-head"></div>
-            <h3 class="font-display font-bold text-xl text-cork-900 mb-1">Join a Bulletin Group</h3>
-            <p class="text-xs text-cork-600 mb-4">Enter the 7-character invite code provided by your group organizer.</p>
-            <form onsubmit="handleJoinGroup(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-cork-800 mb-1">Bulletin Code</label>
-                    <input type="text" id="join-code-input" required uppercase placeholder="e.g. BUL7240" class="w-full px-4 py-2.5 rounded-xl border border-cork-300 bg-white text-sm uppercase tracking-wider font-mono font-bold">
-                </div>
-                <div class="flex justify-end gap-2 pt-2">
-                    <button type="button" onclick="closeModal('join-group-modal')" class="px-4 py-2 text-xs font-bold text-cork-700 hover:bg-cork-200/50 rounded-xl">Cancel</button>
-                    <button type="submit" class="px-5 py-2 bg-cork-700 hover:bg-cork-800 text-white text-xs font-bold rounded-xl shadow">Join Group</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- 3. CREATE POST MODAL -->
-    <div id="create-post-modal" class="fixed inset-0 z-50 bg-cork-950/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-        <div class="bg-paper-yellow border-2 border-amber-300 rounded-3xl paper-shadow w-full max-w-md p-6 relative">
-            <div class="pin-head"></div>
-            <h3 class="font-display font-bold text-xl text-cork-900 mb-4">Pin a Note to Feed</h3>
-            <form onsubmit="handleCreatePost(event)" class="space-y-3">
-                <div>
-                    <label class="block text-xs font-semibold text-cork-800 mb-1">Title</label>
-                    <input type="text" id="post-title" required placeholder="Short headline..." class="w-full px-4 py-2 rounded-xl border border-amber-300 bg-white/90 text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-cork-800 mb-1">Paper Note Color</label>
-                    <div class="flex gap-2">
-                        <label class="cursor-pointer flex-1 text-center py-1.5 rounded-lg border bg-paper-yellow text-xs font-bold"><input type="radio" name="post-color" value="yellow" checked class="hidden"> Yellow</label>
-                        <label class="cursor-pointer flex-1 text-center py-1.5 rounded-lg border bg-paper-green text-xs font-bold"><input type="radio" name="post-color" value="green" class="hidden"> Green</label>
-                        <label class="cursor-pointer flex-1 text-center py-1.5 rounded-lg border bg-paper-pink text-xs font-bold"><input type="radio" name="post-color" value="pink" class="hidden"> Pink</label>
-                        <label class="cursor-pointer flex-1 text-center py-1.5 rounded-lg border bg-paper-blue text-xs font-bold"><input type="radio" name="post-color" value="blue" class="hidden"> Blue</label>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-cork-800 mb-1">Body Text</label>
-                    <textarea id="post-body" rows="3" required placeholder="Write your notice or update..." class="w-full px-4 py-2 rounded-xl border border-amber-300 bg-white/90 text-sm"></textarea>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-cork-800 mb-1">Audience</label>
-                    <select id="post-audience" class="w-full px-3 py-2 rounded-xl border border-amber-300 bg-white/90 text-xs font-semibold">
-                        <option value="Everyone">Everyone in Group</option>
-                        <option value="Admins Only">Admins Only</option>
-                    </select>
-                </div>
-                <div class="flex justify-end gap-2 pt-2">
-                    <button type="button" onclick="closeModal('create-post-modal')" class="px-4 py-2 text-xs font-bold text-cork-700 hover:bg-black/5 rounded-xl">Cancel</button>
-                    <button type="submit" class="px-5 py-2 bg-cork-800 hover:bg-cork-900 text-white text-xs font-bold rounded-xl shadow">Pin Note</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- 4. CREATE EVENT MODAL -->
-    <div id="create-event-modal" class="fixed inset-0 z-50 bg-cork-950/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-        <div class="bg-paper-cream border-2 border-cork-300 rounded-3xl paper-shadow w-full max-w-md p-6 relative">
-            <div class="pin-head"></div>
-            <h3 class="font-display font-bold text-xl text-cork-900 mb-4">Create Group Event</h3>
-            <form onsubmit="handleCreateEvent(event)" class="space-y-3">
-                <div>
-                    <label class="block text-xs font-semibold text-cork-800 mb-1">Event Title</label>
-                    <input type="text" id="event-title" required placeholder="e.g. Neighborhood BBQ" class="w-full px-4 py-2 rounded-xl border border-cork-300 bg-white text-sm">
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="block text-xs font-semibold text-cork-800 mb-1">Date</label>
-                        <input type="date" id="event-date" required class="w-full px-3 py-2 rounded-xl border border-cork-300 bg-white text-xs">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-cork-800 mb-1">Time</label>
-                        <input type="text" id="event-time" placeholder="e.g. 4:00 PM" required class="w-full px-3 py-2 rounded-xl border border-cork-300 bg-white text-xs">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-cork-800 mb-1">Location</label>
-                    <input type="text" id="event-location" required placeholder="e.g. Central Park Pavilion #3" class="w-full px-4 py-2 rounded-xl border border-cork-300 bg-white text-sm">
-                </div>
-                <div class="flex justify-end gap-2 pt-2">
-                    <button type="button" onclick="closeModal('create-event-modal')" class="px-4 py-2 text-xs font-bold text-cork-700 hover:bg-cork-200/50 rounded-xl">Cancel</button>
-                    <button type="submit" class="px-5 py-2 bg-cork-700 hover:bg-cork-800 text-white text-xs font-bold rounded-xl shadow">Schedule Event</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- 5. CREATE POLL MODAL -->
-    <div id="create-poll-modal" class="fixed inset-0 z-50 bg-cork-950/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-        <div class="bg-paper-cream border-2 border-cork-300 rounded-3xl paper-shadow w-full max-w-md p-6 relative">
-            <div class="pin-head"></div>
-            <h3 class="font-display font-bold text-xl text-cork-900 mb-4">Create Voting Poll</h3>
-            <form onsubmit="handleCreatePoll(event)" class="space-y-3">
-                <div>
-                    <label class="block text-xs font-semibold text-cork-800 mb-1">Question</label>
-                    <input type="text" id="poll-question" required placeholder="e.g. Which date works best for game night?" class="w-full px-4 py-2 rounded-xl border border-cork-300 bg-white text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-cork-800 mb-1">Option 1</label>
-                    <input type="text" id="poll-opt-1" required placeholder="Friday Evening" class="w-full px-4 py-2 rounded-xl border border-cork-300 bg-white text-xs">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-cork-800 mb-1">Option 2</label>
-                    <input type="text" id="poll-opt-2" required placeholder="Saturday Afternoon" class="w-full px-4 py-2 rounded-xl border border-cork-300 bg-white text-xs">
-                </div>
-                <div class="flex justify-end gap-2 pt-2">
-                    <button type="button" onclick="closeModal('create-poll-modal')" class="px-4 py-2 text-xs font-bold text-cork-700 hover:bg-cork-200/50 rounded-xl">Cancel</button>
-                    <button type="submit" class="px-5 py-2 bg-cork-700 hover:bg-cork-800 text-white text-xs font-bold rounded-xl shadow">Launch Poll</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MAIN APP JAVASCRIPT LOGIC -->
-    <script>
-        // STATE STORE
-        const DEFAULT_GROUPS = [
-            {
-                id: 'BUL7240',
-                name: 'Sally & Friends Hub',
-                desc: 'Local community updates, weekend plans, and board notices.',
-                code: 'BUL7240',
-                members: [
-                    { name: 'Sally Jenkins', role: 'Admin', handle: '@sallyj', email: 'sally@example.com' },
-                    { name: 'Marcus Vance', role: 'Member', handle: '@marcusv', email: 'marcus@example.com' },
-                    { name: 'Elena Rostova', role: 'Member', handle: '@elena_r', email: 'elena@example.com' }
-                ],
-                posts: [
-                    {
-                        id: 1,
-                        author: 'Sally Jenkins',
-                        color: 'yellow',
-                        title: 'Welcome to our Group Bulletin! 👋',
-                        body: 'This is our official group board. You can pin notices, view upcoming calendar events, vote in quick polls, or chat with our Gemini AI assistant!',
-                        date: '2 hours ago',
-                        likes: 4,
-                        audience: 'Everyone',
-                        comments: [
-                            { author: 'Marcus Vance', text: 'Love the corkboard design!' }
-                        ]
-                    },
-                    {
-                        id: 2,
-                        author: 'Elena Rostova',
-                        color: 'green',
-                        title: 'Weekend Dog Walking Roster 🐕',
-                        body: 'Anyone free to take turns walking Milo on Sunday morning? Let me know below!',
-                        date: 'Yesterday',
-                        likes: 2,
-                        audience: 'Everyone',
-                        comments: []
-                    }
-                ],
-                events: [
-                    {
-                        id: 101,
-                        title: 'Community Garden Cleanup & BBQ',
-                        date: '2026-10-24',
-                        time: '11:00 AM',
-                        location: 'Oak Park Community Garden',
-                        rsvps: ['Sally Jenkins', 'Marcus Vance']
-                    }
-                ],
-                polls: [
-                    {
-                        id: 201,
-                        question: 'Where should we host the monthly dinner?',
-                        options: [
-                            { text: 'Luigi\'s Pizzeria', votes: 3 },
-                            { text: 'Taco Haven', votes: 1 },
-                            { text: 'Park Picnic', votes: 2 }
-                        ],
-                        voted: false
-                    }
-                ]
-            }
-        ];
-
-        let state = {
-            currentUser: null, // Default NULL to enforce authentication
-            groups: DEFAULT_GROUPS,
-            activeGroupId: 'BUL7240',
-            activeTab: 'dashboard',
-            pendingJoinCode: null
-        };
-
-        // INITIALIZATION
-        window.addEventListener('DOMContentLoaded', () => {
-            loadFromLocalStorage();
-            checkUrlJoinCode();
-            verifyAuth();
-        });
-
-        function loadFromLocalStorage() {
-            const savedUser = localStorage.getItem('bulletin_user');
-            if (savedUser) {
-                try { state.currentUser = JSON.parse(savedUser); } catch(e){}
-            }
-
-            const savedGroups = localStorage.getItem('bulletin_groups');
-            if (savedGroups) {
-                try { state.groups = JSON.parse(savedGroups); } catch(e){}
-            }
-        }
-
-        function saveToLocalStorage() {
-            if (state.currentUser) {
-                localStorage.setItem('bulletin_user', JSON.stringify(state.currentUser));
-            } else {
-                localStorage.removeItem('bulletin_user');
-            }
-            localStorage.setItem('bulletin_groups', JSON.stringify(state.groups));
-        }
-
-        // AUTHENTICATION GUARD & FLOW
-        function verifyAuth() {
-            const authModal = document.getElementById('auth-modal');
-            if (!state.currentUser) {
-                // Not logged in -> Show Modal, hide interactive features
-                authModal.classList.remove('hidden');
-            } else {
-                // Logged in -> Hide Auth Modal
-                authModal.classList.add('hidden');
-                updateUserProfileUI();
-                renderGroupDropdowns();
-                renderActiveTab();
-
-                // If user had a pending join code from URL
-                if (state.pendingJoinCode) {
-                    executeJoinCode(state.pendingJoinCode);
-                    state.pendingJoinCode = null;
-                }
-            }
-        }
-
-        function checkUrlJoinCode() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const joinCode = urlParams.get('join');
-            if (joinCode) {
-                state.pendingJoinCode = joinCode.toUpperCase();
-                document.getElementById('auth-invite-banner').classList.remove('hidden');
-                document.getElementById('invite-code-tag').innerText = state.pendingJoinCode;
-            }
-        }
-
-        function switchAuthTab(type) {
-            const loginForm = document.getElementById('login-form');
-            const regForm = document.getElementById('register-form');
-            const loginBtn = document.getElementById('tab-login-btn');
-            const regBtn = document.getElementById('tab-register-btn');
-
-            if (type === 'login') {
-                loginForm.classList.remove('hidden');
-                regForm.classList.add('hidden');
-                loginBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg transition-all bg-paper-cream text-cork-900 shadow-sm";
-                regBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg transition-all text-cork-700 hover:text-cork-900";
-            } else {
-                loginForm.classList.add('hidden');
-                regForm.classList.remove('hidden');
-                regBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg transition-all bg-paper-cream text-cork-900 shadow-sm";
-                loginBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg transition-all text-cork-700 hover:text-cork-900";
-            }
-        }
-
-        function handleLogin(e) {
-            e.preventDefault();
-            const email = document.getElementById('login-email').value.trim();
-            const name = email.split('@')[0];
-            
-            state.currentUser = {
-                name: name.charAt(0).toUpperCase() + name.slice(1),
-                handle: `@${name.toLowerCase()}`,
-                email: email,
-                phone: '+1 (555) 019-2831'
-            };
-
-            saveToLocalStorage();
-            verifyAuth();
-        }
-
-        function handleRegister(e) {
-            e.preventDefault();
-            const name = document.getElementById('reg-name').value.trim();
-            const handle = document.getElementById('reg-handle').value.trim();
-            const email = document.getElementById('reg-email').value.trim();
-            const phone = document.getElementById('reg-phone').value.trim();
-
-            state.currentUser = {
-                name: name,
-                handle: handle.startsWith('@') ? handle : `@${handle}`,
-                email: email,
-                phone: phone || '+1 (555) 000-0000'
-            };
-
-            // Automatically add user to Sally & Friends default group
-            const defaultGroup = state.groups.find(g => g.id === 'BUL7240');
-            if (defaultGroup && !defaultGroup.members.some(m => m.email === email)) {
-                defaultGroup.members.push({
-                    name: name,
-                    role: 'Member',
-                    handle: state.currentUser.handle,
-                    email: email
-                });
-            }
-
-            saveToLocalStorage();
-            verifyAuth();
-
-            // Trigger Onboarding Modal for New Users
-            document.getElementById('onboarding-modal').classList.remove('hidden');
-        }
-
-        function quickDemoLogin() {
-            state.currentUser = {
-                name: 'Alex Johnson',
-                handle: '@alexj',
-                email: 'alex.johnson@example.com',
-                phone: '+1 (555) 234-5678'
-            };
-            saveToLocalStorage();
-            verifyAuth();
-        }
-
-        function handleLogout() {
-            state.currentUser = null;
-            saveToLocalStorage();
-            verifyAuth();
-        }
-
-        // ONBOARDING HANDLERS
-        function nextOnboardingStep(step) {
-            document.getElementById('onboarding-step-1').classList.add('hidden');
-            document.getElementById(`onboarding-step-${step}`).classList.remove('hidden');
-        }
-
-        function finishOnboarding() {
-            document.getElementById('onboarding-modal').classList.add('hidden');
-        }
-
-        // UI RENDERING
-        function updateUserProfileUI() {
-            if (!state.currentUser) return;
-            document.getElementById('user-name-display').innerText = state.currentUser.name;
-            document.getElementById('user-handle-display').innerText = state.currentUser.handle;
-            document.getElementById('user-avatar').innerText = state.currentUser.name.charAt(0).toUpperCase();
-        }
-
-        function renderGroupDropdowns() {
-            const sidebarSelect = document.getElementById('sidebar-group-select');
-            const mobileSelect = document.getElementById('mobile-group-select');
-
-            let html = state.groups.map(g => `<option value="${g.id}" ${g.id === state.activeGroupId ? 'selected' : ''}>${g.name}</option>`).join('');
-            
-            sidebarSelect.innerHTML = html;
-            mobileSelect.innerHTML = html;
-
-            const activeGroup = getActiveGroup();
-            if (activeGroup) {
-                document.getElementById('mobile-group-name').innerText = activeGroup.name;
-            }
-        }
-
-        function getActiveGroup() {
-            return state.groups.find(g => g.id === state.activeGroupId) || state.groups[0];
-        }
-
-        function changeActiveGroup(groupId) {
-            state.activeGroupId = groupId;
-            renderGroupDropdowns();
-            renderActiveTab();
-            saveToLocalStorage();
-        }
-
-        // TAB NAVIGATION
-        function switchTab(tabName) {
-            state.activeTab = tabName;
-            
-            // Update desktop active styles
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('bg-cork-700', 'text-white', 'shadow-sm');
-                btn.classList.add('text-cork-800');
-            });
-            const activeNav = document.getElementById(`nav-${tabName}`);
-            if (activeNav) {
-                activeNav.classList.add('bg-cork-700', 'text-white', 'shadow-sm');
-                activeNav.classList.remove('text-cork-800');
-            }
-
-            renderActiveTab();
-        }
-
-        function renderActiveTab() {
-            const container = document.getElementById('content-area');
-            const group = getActiveGroup();
-
-            switch (state.activeTab) {
-                case 'dashboard':
-                    container.innerHTML = renderDashboard(group);
-                    break;
-                case 'feed':
-                    container.innerHTML = renderFeed(group);
-                    break;
-                case 'summary':
-                    container.innerHTML = renderSummary(group);
-                    break;
-                case 'events':
-                    container.innerHTML = renderEvents(group);
-                    break;
-                case 'polls':
-                    container.innerHTML = renderPolls(group);
-                    break;
-                case 'members':
-                    container.innerHTML = renderMembers(group);
-                    break;
-                case 'gemini':
-                    container.innerHTML = renderGemini();
-                    break;
-                case 'settings':
-                    container.innerHTML = renderSettings();
-                    break;
-            }
-        }
-
-        // TAB TEMPLATES
-        function renderDashboard(group) {
-            return `
-                <div class="space-y-6 max-w-5xl mx-auto">
-                    <!-- Welcome Hero Banner -->
-                    <div class="bg-paper-cream p-6 rounded-3xl border-2 border-cork-300 paper-shadow relative overflow-hidden">
-                        <div class="pin-head"></div>
-                        <span class="text-[10px] font-bold tracking-widest text-cork-600 uppercase">Welcome Back</span>
-                        <h2 class="font-display text-2xl md:text-3xl font-extrabold text-cork-900 mt-1">Hello, ${state.currentUser.name}! 👋</h2>
-                        <p class="text-xs text-cork-700 mt-1">Here is a quick overview of your active bulletin groups.</p>
-                        
-                        <!-- Bulletin Cards Grid -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                            ${state.groups.map(g => `
-                                <div onclick="changeActiveGroup('${g.id}')" class="cursor-pointer p-4 rounded-2xl border-2 ${g.id === group.id ? 'border-cork-600 bg-paper-yellow/90 ring-2 ring-cork-400' : 'border-cork-300 bg-white/80'} hover:shadow-md transition-all relative">
-                                    <div class="flex justify-between items-start mb-2">
-                                        <h3 class="font-bold text-sm text-cork-900">${g.name}</h3>
-                                        <span class="px-2 py-0.5 rounded bg-cork-200 text-cork-900 font-mono text-[10px] font-bold">${g.code}</span>
-                                    </div>
-                                    <p class="text-xs text-cork-700 line-clamp-2 mb-3">${g.desc}</p>
-                                    <div class="flex items-center justify-between text-[11px] font-semibold text-cork-600 pt-2 border-t border-cork-200/60">
-                                        <span>${g.members.length} Members</span>
-                                        <span>${g.posts.length} Posts</span>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-
-                    <!-- Quick Updates Widget -->
-                    <div class="bg-paper-cream p-5 rounded-3xl border-2 border-cork-300 paper-shadow">
-                        <h3 class="font-bold text-sm text-cork-900 mb-3 flex items-center gap-2">
-                            <span>📌 Recent Group Updates</span>
-                        </h3>
-                        <div class="space-y-2">
-                            <div class="p-3 bg-white/80 rounded-xl border border-cork-200 text-xs text-cork-800">
-                                Active Board <strong>${group.name}</strong> has ${group.posts.length} posts and ${group.events.length} upcoming events.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderFeed(group) {
-            return `
-                <div class="max-w-4xl mx-auto space-y-6">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h2 class="font-display text-2xl font-bold text-cork-900">Bulletin Feed</h2>
-                            <p class="text-xs text-cork-700">Pinned notices & group announcements</p>
-                        </div>
-                        <button onclick="openModal('create-post-modal')" class="px-4 py-2 bg-cork-700 hover:bg-cork-800 text-white text-xs font-bold rounded-xl shadow flex items-center gap-2">
-                            <span>+ Pin Note</span>
-                        </button>
-                    </div>
-
-                    <!-- Sticky Notes Grid -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        ${group.posts.map(post => {
-                            const bgClass = post.color === 'green' ? 'bg-paper-green' : post.color === 'pink' ? 'bg-paper-pink' : post.color === 'blue' ? 'bg-paper-blue' : 'bg-paper-yellow';
-                            return `
-                                <div class="${bgClass} p-5 rounded-2xl border border-black/10 paper-shadow relative transform hover:-translate-y-1 transition-all">
-                                    <div class="pin-head"></div>
-                                    <div class="flex items-center justify-between mb-2">
-                                        <span class="text-[10px] font-bold text-cork-700 uppercase tracking-wider">${post.audience}</span>
-                                        <span class="text-[10px] text-cork-600">${post.date}</span>
-                                    </div>
-                                    <h3 class="font-bold text-base text-cork-950 mb-1">${post.title}</h3>
-                                    <p class="text-xs text-cork-900 leading-relaxed mb-4">${post.body}</p>
-                                    
-                                    <div class="pt-3 border-t border-black/10 flex items-center justify-between text-xs font-medium text-cork-800">
-                                        <span>By <strong>${post.author}</strong></span>
-                                        <button onclick="likePost(${post.id})" class="flex items-center gap-1 hover:text-red-600 transition-colors">
-                                            <span>❤️ ${post.likes}</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderSummary(group) {
-            return `
-                <div class="max-w-3xl mx-auto space-y-6">
-                    <div class="bg-paper-cream p-6 rounded-3xl border-2 border-cork-300 paper-shadow relative">
-                        <div class="pin-head"></div>
-                        <h2 class="font-display text-2xl font-bold text-cork-900 mb-1">Weekly Summary Digest</h2>
-                        <p class="text-xs text-cork-600 mb-6">Generated overview for <strong>${group.name}</strong></p>
-
-                        <div class="space-y-4">
-                            <div class="p-4 bg-amber-50 rounded-2xl border border-amber-200">
-                                <h4 class="font-bold text-xs text-amber-900 uppercase tracking-wider mb-2">📢 Notice Board Highlights</h4>
-                                <ul class="list-disc list-inside text-xs text-amber-950 space-y-1">
-                                    ${group.posts.map(p => `<li><strong>${p.title}:</strong> ${p.body.substring(0, 60)}...</li>`).join('')}
-                                </ul>
-                            </div>
-
-                            <div class="p-4 bg-blue-50 rounded-2xl border border-blue-200">
-                                <h4 class="font-bold text-xs text-blue-900 uppercase tracking-wider mb-2">📅 Upcoming Schedule</h4>
-                                ${group.events.length === 0 ? '<p class="text-xs text-blue-800">No events scheduled this week.</p>' : 
-                                    group.events.map(e => `<p class="text-xs text-blue-950"><strong>${e.title}</strong> - ${e.date} at ${e.time} (${e.location})</p>`).join('')}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderEvents(group) {
-            return `
-                <div class="max-w-3xl mx-auto space-y-6">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h2 class="font-display text-2xl font-bold text-cork-900">Events & Schedule</h2>
-                            <p class="text-xs text-cork-700">Sync with device calendar</p>
-                        </div>
-                        <button onclick="openModal('create-event-modal')" class="px-4 py-2 bg-cork-700 hover:bg-cork-800 text-white text-xs font-bold rounded-xl shadow">
-                            + Schedule Event
-                        </button>
-                    </div>
-
-                    <div class="space-y-4">
-                        ${group.events.map(ev => `
-                            <div class="bg-paper-cream p-5 rounded-2xl border-2 border-cork-300 paper-shadow flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                <div class="space-y-1">
-                                    <span class="inline-block px-2.5 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-bold rounded-md">${ev.date} @ ${ev.time}</span>
-                                    <h3 class="font-bold text-base text-cork-900">${ev.title}</h3>
-                                    <p class="text-xs text-cork-700">📍 ${ev.location}</p>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <button onclick="rsvpEvent(${ev.id})" class="px-4 py-2 bg-cork-800 text-white text-xs font-bold rounded-xl shadow">
-                                        RSVP (${ev.rsvps.length})
-                                    </button>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderPolls(group) {
-            return `
-                <div class="max-w-2xl mx-auto space-y-6">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h2 class="font-display text-2xl font-bold text-cork-900">Group Polls</h2>
-                            <p class="text-xs text-cork-700">Vote on upcoming decisions</p>
-                        </div>
-                        <button onclick="openModal('create-poll-modal')" class="px-4 py-2 bg-cork-700 hover:bg-cork-800 text-white text-xs font-bold rounded-xl shadow">
-                            + New Poll
-                        </button>
-                    </div>
-
-                    <div class="space-y-4">
-                        ${group.polls.map(p => `
-                            <div class="bg-paper-cream p-5 rounded-2xl border-2 border-cork-300 paper-shadow space-y-3">
-                                <h3 class="font-bold text-sm text-cork-900">${p.question}</h3>
-                                <div class="space-y-2">
-                                    ${p.options.map((opt, idx) => `
-                                        <button onclick="votePoll(${p.id}, ${idx})" class="w-full text-left p-3 rounded-xl border border-cork-300 bg-white/80 hover:bg-white flex items-center justify-between text-xs font-semibold text-cork-900">
-                                            <span>${opt.text}</span>
-                                            <span class="bg-cork-200 px-2 py-0.5 rounded text-[10px]">${opt.votes} votes</span>
-                                        </button>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderMembers(group) {
-            const inviteUrl = `${window.location.origin}${window.location.pathname}?join=${group.code}`;
-            return `
-                <div class="max-w-3xl mx-auto space-y-6">
-                    <!-- Invite Share Card -->
-                    <div class="bg-paper-cream p-5 rounded-3xl border-2 border-cork-300 paper-shadow space-y-3">
-                        <h3 class="font-bold text-sm text-cork-900">Group Invite Link</h3>
-                        <p class="text-xs text-cork-700">Share this link or code <strong>${group.code}</strong> with friends to invite them!</p>
-                        <div class="flex items-center gap-2">
-                            <input type="text" readonly value="${inviteUrl}" class="flex-1 px-3 py-2 bg-white border border-cork-300 rounded-xl text-xs font-mono">
-                            <button onclick="copyToClipboard('${inviteUrl}')" class="px-4 py-2 bg-cork-700 text-white text-xs font-bold rounded-xl shadow">Copy Link</button>
-                        </div>
-                    </div>
-
-                    <!-- Member List -->
-                    <div class="bg-paper-cream p-5 rounded-3xl border-2 border-cork-300 paper-shadow space-y-4">
-                        <h3 class="font-bold text-sm text-cork-900">Members (${group.members.length})</h3>
-                        <div class="divide-y divide-cork-200">
-                            ${group.members.map(m => `
-                                <div class="py-3 flex items-center justify-between">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-full bg-cork-700 text-white flex items-center justify-center font-bold text-xs">
-                                            ${m.name.charAt(0)}
-                                        </div>
-                                        <div>
-                                            <h4 class="text-xs font-bold text-cork-900">${m.name}</h4>
-                                            <p class="text-[10px] text-cork-600">${m.handle}</p>
-                                        </div>
-                                    </div>
-                                    <span class="px-2 py-0.5 bg-cork-200 text-cork-800 text-[10px] font-bold rounded">${m.role}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderGemini() {
-            return `
-                <div class="max-w-2xl mx-auto h-full flex flex-col space-y-4">
-                    <div class="bg-paper-cream p-4 rounded-2xl border-2 border-cork-300 paper-shadow flex items-center gap-3">
-                        <div class="w-8 h-8 bg-amber-500 text-white rounded-lg flex items-center justify-center font-bold text-sm">✨</div>
-                        <div>
-                            <h2 class="font-display font-bold text-sm text-cork-900">Gemini AI Helper</h2>
-                            <p class="text-[11px] text-cork-600">Ask questions about your group's calendar, notices, and events!</p>
-                        </div>
-                    </div>
-
-                    <div id="ai-chat-box" class="flex-1 bg-paper-cream/80 p-4 rounded-2xl border-2 border-cork-300 paper-shadow overflow-y-auto space-y-3 min-h-[300px]">
-                        <div class="p-3 bg-amber-100 rounded-2xl max-w-xs text-xs text-amber-950">
-                            Hello! I am Gemini, your group assistant. How can I help you today?
-                        </div>
-                    </div>
-
-                    <form onsubmit="handleAiChat(event)" class="flex gap-2">
-                        <input type="text" id="ai-input" required placeholder="Ask Gemini..." class="flex-1 px-4 py-2.5 rounded-xl border border-cork-300 bg-white text-xs">
-                        <button type="submit" class="px-5 py-2.5 bg-cork-700 text-white text-xs font-bold rounded-xl shadow">Send</button>
-                    </form>
-                </div>
-            `;
-        }
-
-        function renderSettings() {
-            return `
-                <div class="max-w-xl mx-auto space-y-6">
-                    <div class="bg-paper-cream p-6 rounded-3xl border-2 border-cork-300 paper-shadow space-y-4">
-                        <h2 class="font-display text-xl font-bold text-cork-900">Account Settings</h2>
-                        
-                        <div class="space-y-3 text-xs">
-                            <div>
-                                <label class="block font-semibold text-cork-700">Full Name</label>
-                                <input type="text" disabled value="${state.currentUser.name}" class="w-full mt-1 px-3 py-2 bg-cork-100 rounded-xl border border-cork-300 text-cork-800">
-                            </div>
-                            <div>
-                                <label class="block font-semibold text-cork-700">Email Address</label>
-                                <input type="text" disabled value="${state.currentUser.email}" class="w-full mt-1 px-3 py-2 bg-cork-100 rounded-xl border border-cork-300 text-cork-800">
-                            </div>
-                            <div>
-                                <label class="block font-semibold text-cork-700">Handle</label>
-                                <input type="text" disabled value="${state.currentUser.handle}" class="w-full mt-1 px-3 py-2 bg-cork-100 rounded-xl border border-cork-300 text-cork-800">
-                            </div>
-                        </div>
-
-                        <div class="pt-4 border-t border-cork-200">
-                            <button onclick="handleLogout()" class="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl shadow transition-all">
-                                Sign Out of Account
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        // HANDLERS & INTERACTIONS
-        function toggleFab() {
-            const menu = document.getElementById('fab-menu');
-            const icon = document.getElementById('fab-icon');
-            if (menu.classList.contains('hidden')) {
-                menu.classList.remove('hidden');
-                setTimeout(() => {
-                    menu.classList.remove('opacity-0', 'scale-95');
-                }, 10);
-                icon.classList.add('rotate-45');
-            } else {
-                menu.classList.add('opacity-0', 'scale-95');
-                icon.classList.remove('rotate-45');
-                setTimeout(() => {
-                    menu.classList.add('hidden');
-                }, 200);
-            }
-        }
-
-        function openModal(id) {
-            document.getElementById(id).classList.remove('hidden');
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-        }
-
-        function handleCreateGroup(e) {
-            e.preventDefault();
-            const name = document.getElementById('new-group-name').value.trim();
-            const desc = document.getElementById('new-group-desc').value.trim();
-            const code = 'BUL' + Math.floor(1000 + Math.random() * 9000);
-
-            const newGroup = {
-                id: code,
-                name: name,
-                desc: desc,
-                code: code,
-                members: [{ name: state.currentUser.name, role: 'Admin', handle: state.currentUser.handle, email: state.currentUser.email }],
-                posts: [],
-                events: [],
-                polls: []
-            };
-
-            state.groups.push(newGroup);
-            state.activeGroupId = code;
-            saveToLocalStorage();
-            closeModal('create-group-modal');
-            renderGroupDropdowns();
-            renderActiveTab();
-        }
-
-        function handleJoinGroup(e) {
-            e.preventDefault();
-            const code = document.getElementById('join-code-input').value.trim().toUpperCase();
-            executeJoinCode(code);
-            closeModal('join-group-modal');
-        }
-
-        function executeJoinCode(code) {
-            const targetGroup = state.groups.find(g => g.code === code);
-            if (targetGroup) {
-                if (!targetGroup.members.some(m => m.email === state.currentUser.email)) {
-                    targetGroup.members.push({
-                        name: state.currentUser.name,
-                        role: 'Member',
-                        handle: state.currentUser.handle,
-                        email: state.currentUser.email
-                    });
-                }
-                state.activeGroupId = targetGroup.id;
-                saveToLocalStorage();
-                renderGroupDropdowns();
-                renderActiveTab();
-                alert(`Successfully joined ${targetGroup.name}!`);
-            } else {
-                alert('Invalid group code. Please check and try again.');
-            }
-        }
-
-        function handleCreatePost(e) {
-            e.preventDefault();
-            const group = getActiveGroup();
-            const title = document.getElementById('post-title').value.trim();
-            const body = document.getElementById('post-body').value.trim();
-            const audience = document.getElementById('post-audience').value;
-            const color = document.querySelector('input[name="post-color"]:checked').value;
-
-            group.posts.unshift({
-                id: Date.now(),
-                author: state.currentUser.name,
-                color: color,
-                title: title,
-                body: body,
-                date: 'Just now',
-                likes: 0,
-                audience: audience,
-                comments: []
-            });
-
-            saveToLocalStorage();
-            closeModal('create-post-modal');
-            renderActiveTab();
-        }
-
-        function handleCreateEvent(e) {
-            e.preventDefault();
-            const group = getActiveGroup();
-            group.events.push({
-                id: Date.now(),
-                title: document.getElementById('event-title').value.trim(),
-                date: document.getElementById('event-date').value,
-                time: document.getElementById('event-time').value.trim(),
-                location: document.getElementById('event-location').value.trim(),
-                rsvps: [state.currentUser.name]
-            });
-
-            saveToLocalStorage();
-            closeModal('create-event-modal');
-            renderActiveTab();
-        }
-
-        function handleCreatePoll(e) {
-            e.preventDefault();
-            const group = getActiveGroup();
-            group.polls.push({
-                id: Date.now(),
-                question: document.getElementById('poll-question').value.trim(),
-                options: [
-                    { text: document.getElementById('poll-opt-1').value.trim(), votes: 0 },
-                    { text: document.getElementById('poll-opt-2').value.trim(), votes: 0 }
-                ]
-            });
-
-            saveToLocalStorage();
-            closeModal('create-poll-modal');
-            renderActiveTab();
-        }
-
-        function likePost(postId) {
-            const group = getActiveGroup();
-            const post = group.posts.find(p => p.id === postId);
-            if (post) {
-                post.likes++;
-                saveToLocalStorage();
-                renderActiveTab();
-            }
-        }
-
-        function votePoll(pollId, optionIndex) {
-            const group = getActiveGroup();
-            const poll = group.polls.find(p => p.id === pollId);
-            if (poll) {
-                poll.options[optionIndex].votes++;
-                saveToLocalStorage();
-                renderActiveTab();
-            }
-        }
-
-        function rsvpEvent(eventId) {
-            const group = getActiveGroup();
-            const ev = group.events.find(e => e.id === eventId);
-            if (ev && !ev.rsvps.includes(state.currentUser.name)) {
-                ev.rsvps.push(state.currentUser.name);
-                saveToLocalStorage();
-                renderActiveTab();
-            }
-        }
-
-        function handleAiChat(e) {
-            e.preventDefault();
-            const input = document.getElementById('ai-input');
-            const chatBox = document.getElementById('ai-chat-box');
-            const query = input.value.trim();
-            if (!query) return;
-
-            // User message
-            chatBox.innerHTML += `<div class="p-3 bg-cork-700 text-white rounded-2xl max-w-xs ml-auto text-xs">${query}</div>`;
-            input.value = '';
-
-            // AI Answer Simulation
-            setTimeout(() => {
-                const group = getActiveGroup();
-                let reply = `In ${group.name}, you have ${group.events.length} upcoming events and ${group.posts.length} notices on the feed!`;
-                chatBox.innerHTML += `<div class="p-3 bg-amber-100 rounded-2xl max-w-xs text-xs text-amber-950">${reply}</div>`;
-                chatBox.scrollTop = chatBox.scrollHeight;
-            }, 600);
-        }
-
-        function copyToClipboard(text) {
-            const input = document.createElement('input');
-            input.value = text;
-            document.body.appendChild(input);
-            input.select();
-            document.execCommand('copy');
-            document.body.removeChild(input);
-            alert('Invite link copied to clipboard!');
-        }
-    </script>
-</body>
-</html>
+<body>
+
+  <!-- AUTH SCREEN -->
+  <div id="auth-overlay">
+    <div class="auth-card">
+      <div class="auth-pin"></div>
+      <h2 class="auth-title" id="auth-title">Welcome to Bulletin</h2>
+      <p class="auth-sub" id="auth-sub">Sign in to access your groups</p>
+      
+      <form id="auth-form" onsubmit="handleAuth(event)">
+        <div class="form-group" id="name-group" style="display: none;">
+          <label>Full Name</label>
+          <input type="text" id="auth-name" class="form-control"
